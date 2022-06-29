@@ -7,7 +7,7 @@ NPLM is a strategy to detect data departures from a given reference model, with 
 ## Related works:
 - *"Learning New Physics from a Machine"* ([Phys. Rev. D](https://doi.org/10.1103/PhysRevD.99.015014))
 - *"Learning Multivariate New Physics"* ([Eur. Phys. J. C](https://doi.org/10.1140/epjc/s10052-021-08853-y))
-- *"Learning New Physics from an Imperfect Machine"* ([arXiv](https://arxiv.org/abs/2111.13633))
+- *"Learning New Physics from an Imperfect Machine"* ([Eur. Phys. J. C](https://doi.org/10.1140/epjc/s10052-022-10226-y))
 
 ## Envirnoment set up:
 Create a virtual environment with the packages specified in `requirements.txt`
@@ -28,6 +28,15 @@ Create a virtual environment with the packages specified in `requirements.txt`
   pip freeze
   ```
   Now you are ready to download the [NPLM](https://pypi.org/project/NPLM/) package:
+  ```
+  pip install NPLM
+  ```
+## Envirnoment set up on lxplus at Cern
+  Just source the virtual environment: 
+  ```
+  source /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc10-opt/setup.sh
+  ```
+  Download the [NPLM](https://pypi.org/project/NPLM/) package:
   ```
   pip install NPLM
   ```
