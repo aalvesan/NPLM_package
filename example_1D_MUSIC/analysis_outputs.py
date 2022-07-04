@@ -7,10 +7,11 @@ from NPLM.ANALYSISutils import *
 
 ###########################################################
 
-jobs_folder = '/eos/user/a/aalvesan/ML_test/Nbkg4693_patience1000_epochs4000_arc1_4_1_wclip14'
-out_folder  = '/eos/user/a/aalvesan/ML_test/analysis_outputs'
+### PUT A SLASH AT THE END OF THE PATH !!! ### 
+jobs_folder = '/eos/user/a/aalvesan/ml_test/Nbkg4693_patience1000_epochs4000_arc1_4_1_wclip14/'
+out_folder  = '/eos/user/a/aalvesan/ml_test/analysis_outputs/'
 
-json_file = '%s/config.json'%(out_folder)
+json_file = '%sconfig.json'%(out_folder)
 with open(json_file, 'r') as jsonfile:
     config_json = json.load(jsonfile)
     
@@ -26,20 +27,23 @@ N_Bkg               = config_json['N_Bkg']
 
 values, files_id_tau, seeds_tau = collect_txt(DIR_IN = jobs_folder, suffix = 'TAU', files_prefix = [],  verbose = False) # this function returns 3 arrays: for  t values, labels and seeds 
 
-print ('')
-print ('tau values after Read_final_from_h5 is : \n')
-print (values)
+#print ('')
+#print ('tau values after Read_final_from_h5 is : \n')
+#print (values)
 
 save_txt_to_h5(values, files_id_tau, seeds_tau, suffix = 'final', DIR_OUT = out_folder, FILE_NAME = 'TAU') # this function saves the 3 arrays above as datasets in a .h5 file 
 
-#print values
-#print files_id_tau 
-#print seeds_tau
+print '\n values are : \n' 
+print values
+print '\n files_id are : \n' 
+print files_id_tau 
+print '\n seeds are : \n' 
+print seeds_tau
 
 keys = ['loss'] #'norm_0', 'shape_0']
 for key in keys:
     key_history = collect_history(files_id = files_id_tau, DIR_IN = jobs_folder, suffix = 'TAU', key = key, verbose = False) # this function returns a 2D array of the loss history  with shape (nr. toys, nr. check points). i.e. for each toy experiment we collect the t = -2 * loss at specific checkpoints
-
+    print ('key_history.shape is : ' + str(key_history.shape))
     save_history_to_h5(suffix = 'history', patience = TAU_patience, tvalues_check = key_history, DIR_OUT = out_folder, FILE_NAME = 'TAU', seeds=seeds_tau) # this function saves the 2D array above into a .h5 log_file 
 
 
@@ -47,17 +51,17 @@ for key in keys:
 ##### Reading/analysing summary files ####
 ##########################################
 
-tau, tau_seeds   = Read_final_from_h5(DIR_IN = out_folder, FILE_NAME = 'TAU', suffix='_final')      # this function returns 2 arrays: the t values and the seed values 
+tau, tau_seeds   = Read_final_from_h5(DIR_IN = out_folder, FILE_NAME = 'tau', suffix='_final')      # this function returns 2 arrays: the t values and the seed values 
 
 print ('tau after Read_final_from_h5 is : \n')
 print (tau)
 
-tau_history      = Read_history_from_h5(DIR_IN = out_folder, FILE_NAME = 'TAU', suffix='_history')  # this function opens the .h5 history log_file from above and creates a 2D array
+tau_history      = Read_history_from_h5(DIR_IN = out_folder, FILE_NAME = 'tau', suffix='_history')  # this function opens the .h5 history log_file from above and creates a 2D array
 
 ##### Plotting empirical TAU distribution 
 
 label            = 'B=%i'%(N_Bkg)
-plot_1distribution(tau, df=TAU_df, xmin=0, xmax=15000, nbins=12, label=r'$\tau(D)$, '+label, save=False, save_path='', file_name='')
+plot_1distribution(tau, df=TAU_df, xmin=0, xmax=120, nbins=12, label=r'$\tau(D)$, '+label, save=False, save_path='', file_name='')
 
 ##### Plotting TAU distribution's evolution during training time  
 
@@ -67,7 +71,7 @@ Plot_Percentiles_ref(tau_history, df=TAU_df, patience=TAU_patience,  wc=str(TAU_
 
 label = 'B=%i'%(N_Bkg)
 
-plot_2distribution(tau, tau-delta, df=TAU_df, xmin=0, xmax=15000, nbins=16, 
+plot_2distribution(tau, tau-delta, df=TAU_df, xmin=0, xmax=120, nbins=16, 
                    label1=r'$\tau(D,\,A), $'+label, label2=r'$\tau(D,\,A)-\Delta(D,\,A)$, '+label,
                    save=False, save_path='', file_name='')
 

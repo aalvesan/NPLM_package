@@ -84,7 +84,7 @@ def collect_history(files_id, DIR_IN, suffix='t', key='loss', verbose=False):
     tdistributions_check =np.array([])
     cnt=0
     for file_id in files_id:
-        history_file = DIR_IN+file_id+suffix+'_history.h5'
+        history_file = DIR_IN+file_id+'_'+suffix+'_history.h5'
         if not os.path.exists(history_file):
             continue
         f = h5py.File(history_file, 'r')
@@ -182,7 +182,9 @@ def Read_history_from_h5(DIR_IN, FILE_NAME, suffix):
     '''
     log_file = DIR_IN+FILE_NAME+suffix+'.h5'
     f = h5py.File(log_file,"r")
-    epochs_check  = [int(key) for key in list(f.keys())]
+    for key in list(f.keys()):
+        if key!='seeds':
+            epochs_check  = [int(key)]
     tvalues_check = np.array([])
     for i in range(len(epochs_check)):
         t = f.get(str(epochs_check[i]))

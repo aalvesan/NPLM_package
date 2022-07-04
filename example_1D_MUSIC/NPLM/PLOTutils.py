@@ -102,7 +102,6 @@ def plot_1distribution(t, df, xmin=0, xmax=300, nbins=10, label='', save=False, 
     df: (int) chi2 degrees of freedom
     '''
     plt.rcParams["font.family"] = "serif"
-    plt.style.use('classic')
     fig  = plt.figure(figsize=(12, 9))
     fig.patch.set_facecolor('white')
     # plot distribution histogram
@@ -148,7 +147,6 @@ def plot_2distribution(t1, t2, df, xmin=0, xmax=300, nbins=10, label1='1', label
     df: (int) chi2 degrees of freedom
     '''
     plt.rcParams["font.family"] = "serif"
-    plt.style.use('classic')
     fig  = plt.figure(figsize=(12, 9))
     fig.patch.set_facecolor('white')
     # plot distribution histogram
@@ -221,7 +219,6 @@ def Plot_Percentiles(tvalues_check, patience=1, checkpoints=[], ylabel='t', ymax
     '''
     colors = ['seagreen','mediumseagreen','lightseagreen','#2c7fb8','midnightblue']
     plt.rcParams["font.family"] = "serif"
-    plt.style.use('classic')
     epochs_check = []
     mask         = []
     nr_check_points = tvalues_check.shape[1]
@@ -275,7 +272,6 @@ def Plot_Percentiles_ref(tvalues_check, df, patience=1, wc=None, ymax=300, ymin=
     '''
     colors = ['seagreen', 'mediumseagreen', 'lightseagreen', '#2c7fb8', 'midnightblue']
     plt.rcParams["font.family"] = "serif"
-    plt.style.use('classic')
     epochs_check = []
     nr_check_points = tvalues_check.shape[1]
     for i in range(nr_check_points):
@@ -326,7 +322,6 @@ def plot_alpha_scores(t1, t2, df, Zscore_star_list=[2, 3, 5], label1='1', label2
     df: (int) chi2 degrees of freedom
     '''
     plt.rcParams["font.family"] = "serif"
-    plt.style.use('classic')
     fig  = plt.figure(figsize=(12, 9))
     fig.patch.set_facecolor('white')
     y1, y2 = get_percentage_from_Zscore (t1, df, Zscore_star_list)
@@ -377,7 +372,6 @@ def plot_training_data(data, weight_data, ref, weight_ref, feature_labels, bins_
     for key in feature_labels:
         bins = bins_code[key]
         plt.rcParams["font.family"] = "serif"
-        plt.style.use('classic')
         fig = plt.figure(figsize=(10, 10)) 
         fig.patch.set_facecolor('white')  
         ax1= fig.add_axes([0.1, 0.43, 0.8, 0.5])        
@@ -444,7 +438,6 @@ def plot_reconstruction(df, data, weight_data, ref, weight_ref, tau_OBS, output_
     for key in feature_labels:
         bins = bins_code[key]
         plt.rcParams["font.family"] = "serif"
-        plt.style.use('classic')
         fig = plt.figure(figsize=(10, 10)) 
         fig.patch.set_facecolor('white')  
         ax1= fig.add_axes([0.1, 0.43, 0.8, 0.5])        

@@ -124,7 +124,7 @@ counter = 0                  # the counter will count how many times we apply th
 while DATA.shape[0]<N_DATA:  # filling the pseudo datasets until we have the desired number of pseudo events N_DATA                                                                                          
 
         i = indeces[counter] # counter starts at 0 and increases at each loop. i = indeces[0]. If indices = [3, 27, 89, 2, ... ], then indeces[0]=3                                                          
-        x = REF[i:i+1, :]    # selects the information from one event e.g. REF[0:1,:] = [[SumPt3, InvMass3, MET3]]                                                                                           
+TAU_final.h5        x = REF[i:i+1, :]    # selects the information from one event e.g. REF[0:1,:] = [[SumPt3, InvMass3, MET3]]                                                                                           
         f = weight[i]        # NewWeight of this specific event weight[3]                                                                                                                                    
 
         if f<0:                                     # we neglect negative weighted events                                                                                                                    
@@ -199,6 +199,7 @@ for j in range(feature.shape[1]):          # i.e. j in range(3) because we are u
 print(' -->  Training TAU ...  ')
 batch_size = feature.shape[0]
 input_shape = feature.shape[1]
+
 
 tau = imperfect_model(input_shape=(None, inputsize),
                       NU_S=NU_S, NUR_S=NUR_S, NU0_S=NU0_S, SIGMA_S=SIGMA_S, 
