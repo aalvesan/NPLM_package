@@ -1,0 +1,31 @@
+Random seed:475102
+  1Ele_1Muon_1MET |  nr. of simulations: 74389 |  yield: 6075.599967
+
+cross section effect on N_D: 1.000000
+N_Bkg: 4693
+N_Bkg_Pois: 4708
+
+--> End of file
+
+ -->  Training TAU ...  
+Model: "model"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+bs_mfinder_net (BSMfinderNet multiple                  13        
+=================================================================
+Total params: 13
+Trainable params: 13
+Non-trainable params: 0
+_________________________________________________________________
+None
+Training time (seconds):
+42.48199486732483
+
+ ...  End of TAU taining.
+
+
+-- > TAU: 11696.948242 
+
+loss: -5848.474121
+BSM: -310556.062500

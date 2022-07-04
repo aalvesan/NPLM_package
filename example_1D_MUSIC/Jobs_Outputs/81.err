@@ -1,0 +1,5 @@
+2022-07-04 15:47:45.896931: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2022-07-04 15:47:45.920751: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 2194925000 Hz
+2022-07-04 15:47:45.925193: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x2be47f0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2022-07-04 15:47:45.925277: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
