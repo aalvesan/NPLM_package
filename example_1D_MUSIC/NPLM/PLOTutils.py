@@ -4,6 +4,29 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from scipy.stats import norm, expon, chi2, uniform, chisquare
     
+def Plot_variable(variable,ylabel='',save=False):
+    
+    fig = plt.figure(figsize=(12,6))
+    fig.patch.set_facecolor('white')
+    plt.plot(variable, label='%s'%variable)
+    font=font_manager.FontProperties(family='serif', size=18)
+    plt.legend(prop=font)
+    plt.ylabel(ylabel, fontsize=18, fontname='serif')
+    plt.xlabel('Epochs', fontsize=18, fontname='serif')
+    plt.xticks(fontsize=16, fontname='serif')
+    plt.yticks(fontsize=16, fontname='serif')
+    plt.grid()
+    if save:
+        if save_path=='': print('argument save_path is not defined. The figure will not be saved.')
+        else:
+            if file_name=='': file_name = '$s'%variable
+            else: file_name += '_%s'%variable
+            plt.savefig(save_path+file_name+'.pdf')
+    plt.show()
+    plt.close()
+
+
+
 def Plot_Analysis_tdistribution(tvalues_BkgOnly, tvalues, df, rmin, rmax, bins=35, verbose=False, save=False, file_name='', save_path=''):
     '''
     The function creates the plot for the comparison of two samples of toys at the end of the training.
@@ -93,7 +116,7 @@ def get_percentage_from_Zscore (t, df, Zscore_star_list=[], verbose=False):
             print('Z-score > %s: t > %s, percentage: %s'%(str(np.around(Zscore_star_list[i], 2)), str(np.around(t_star_list[i], 2)), str(np.around(percentage[i], 2)) ))
     return t_star_list, percentage
 
-def plot_1distribution(t, df, xmin=0, xmax=300, nbins=10, label='', save=False, save_path='', file_name=''):
+def plot_1distribution(t, df, xmin=11000, xmax=12000, nbins=20, label='', save=False, save_path='', file_name=''):
     '''
     Plot the histogram of a test statistics sample (t) and the target chi2 distribution. 
     The median and the error on the median are calculated in order to calculate the median Z-score and its error.
@@ -119,8 +142,8 @@ def plot_1distribution(t, df, xmin=0, xmax=300, nbins=10, label='', save=False, 
     x   = 0.5*(bins[1:]+bins[:-1])
     plt.errorbar(x, h[0], yerr = err, color='#2c7fb8', marker='o', ls='')
     # plot reference chi2
-    x  = np.linspace(chi2.ppf(0.0001, df), chi2.ppf(0.9999, df), 100)
-    plt.plot(x, chi2.pdf(x, df),'midnightblue', lw=5, alpha=0.8, label=r'$\chi^2$('+str(df)+')')
+    #x  = np.linspace(chi2.ppf(0.001, df), chi2.ppf(0.1, df), 100)
+    #plt.plot(x, chi2.pdf(x, df),'midnightblue', lw=5, alpha=0.8, label=r'$\chi^2$('+str(df)+')')
     font = font_manager.FontProperties(family='serif', size=14) 
     plt.legend(prop=font)
     plt.xlabel('t', fontsize=18, fontname="serif")

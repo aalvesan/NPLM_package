@@ -1,8 +1,0 @@
-executable = Jobs_Outputs/51.src
-universe = vanilla
-output = Jobs_Outputs/51.out
-error =  Jobs_Outputs/51.err
-log = Jobs_Outputs/51.log
-+MaxRuntime = 500000
-requirements = (OpSysAndVer =?= "CentOS7")
-queue

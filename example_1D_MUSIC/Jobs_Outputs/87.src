@@ -1,3 +1,0 @@
-#!/bin/bash
-source /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc10-opt/setup.sh
-python /afs/cern.ch/user/a/aalvesan/private/NPLM_package/example_1D_MUSIC/toy_MUSIC.py -j /eos/user/a/aalvesan/ML_test//Nbkg4693_patience1000_epochs4000_arc1_4_1_wclip14/config.json

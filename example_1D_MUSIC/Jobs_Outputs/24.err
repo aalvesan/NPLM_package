@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/afs/cern.ch/user/a/aalvesan/private/NPLM_package/example_1D_MUSIC/toy_MUSIC.py", line 126, in <module>
-    i = indeces[counter] # counter starts at 0 and increases at each loop. i = indeces[0]. If indices = [3, 27, 89, 2, ... ], then indeces[0]=3                                                          
-IndexError: index 74389 is out of bounds for axis 0 with size 74389

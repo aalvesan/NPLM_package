@@ -31,7 +31,7 @@ with open(args.jsonfile, 'r') as jsonfile:
     
 seed = datetime.datetime.now().microsecond+datetime.datetime.now().second+datetime.datetime.now().minute
 np.random.seed(seed)
-print('Random seed:'+str(seed))
+print('\n Random seed: '+str(seed))
 
 columns_training = config_json["features"]
 
@@ -68,7 +68,7 @@ if os.path.isfile("%s/%s_t.txt" %(OUTPUT_PATH, OUTPUT_FILE_ID)):
 ######## Reading input H5 Files ######### 
 ######################################### 
                                                                                                                                                                    
-INPUT_PATH_REF  = '/eos/user/a/aalvesan/ML_test/H5_MC_input/'                              # path to the MC h5 file to serve as input            
+INPUT_PATH_REF  = '/eos/user/a/aalvesan/ml_test/H5_MC_input/'                              # path to the MC h5 file to serve as input            
 
 feature_dict    = { 'weight_REF': np.array([]),
                     'weight_DATA': np.array([])}
@@ -85,15 +85,18 @@ for classname in ML_Classes:                                                    
         for key in columns_training:
                 feature_dict[key] = np.append(feature_dict[key], np.array(f.get(key)))      # reading SumPt amd creating a feature                                                                           
         f.close()
-        print('  %s |  nr. of simulations: %i |  yield: %f'%(classname,w.shape[0], np.sum(w)))
+        print('\n%s |  nr. of simulations: %i |  yield: %f'%(classname,w.shape[0], np.sum(w)))
 
 weight_sum_R  = np.sum(feature_dict['weight_REF'])                                          # = sum(NewWeights)                                                          
 weight_sum_D  = np.sum(feature_dict['weight_DATA'])                                         # = sum(NewWeights) same as above                            
 
 W_REF         = feature_dict['weight_REF']                                                  # this is just the NewWeights dataset from H5 file          
 REF           = np.stack([feature_dict[key] for key in list(columns_training)], axis=1)     # REF gives [[SumPt1, InvMass1, MET1]                     
-                                                                                            #            [SumPt2, InvMass2, MET2] ... ]         
-                                                                                                                                                   
+                                                                                            #            [SumPt2, InvMass2, MET2] ... ] 
+                                                                                            # in this case is only [[SumPt1],[SumPt2], ... ]         
+print ('\n feacture_dict is : \n')
+print (feature_dict)
+
 #####################################################################                                    
 ####### Hit or Miss Method - Building Pseudo datasets  ##############                                   
 #####################################################################                                                                                                                                        
@@ -102,63 +105,67 @@ N_REF    = REF.shape[0]                 # number of unweighted MC events i.e. nu
 weight   = feature_dict['weight_DATA']  # same as W_REF, is just the NewWeights dataset                                                          
 f_MAX    = np.max(weight)               # selecting the maximum weight                                                       
 
-indeces  = np.arange(weight.shape[0])   # returns a list of integeres indeces in the range [0, 1, ... , #nr of unweighted events -1]                        
-np.random.shuffle(indeces)              # everyday I am shuffeling                                                                         
+indices  = np.arange(weight.shape[0])   # returns a list of integeres indices in the range [0, 1, ... , #nr of unweighted events -1]                        
+np.random.shuffle(indices)              # everyday I am shuffeling                                                                         
 DATA     = np.array([])                 # this is our pseudo dataset. It is just an empty list now. I will be filled later                    
-DATA_idx = np.array([],dtype=int)       # DATA_inx will be a list filled with the shuffled indeces of the picked up events. e.g. [3, 27, 89, 2, ... ]      
+DATA_idx = np.array([],dtype=int)       # DATA_inx will be a list filled with the shuffled indices of the picked up events. e.g. [3, 27, 89, 2, ... ]      
 
 # We want a different nr of events (N_DATA) for each pseudo dataset. We use a Poisson distribution (N_Bkg as expected events) to pick a different  N_DATA each time   
 N_DATA   = np.random.poisson(lam=N_Bkg*weight_sum_D/weight_sum_R, size=1)[0]
-print('')
-print('cross section effect on N_D: %f'%(weight_sum_D/weight_sum_R))            # this is just = 1                                                                       
+
+print('\n'+'cross section effect on N_D: %f'%(weight_sum_D/weight_sum_R))            # this is just = 1                                                                       
 print('N_Bkg: '+str(N_Bkg))                                                     # actual number of data events                                                  
-print('N_Bkg_Pois: '+str(N_DATA))                                               # number of events for this pseudo toy dataset            
-print('')
+print('N_Bkg_Pois: '+str(N_DATA)+'\n')                                               # number of events for this pseudo toy dataset       
 
 if N_REF<N_DATA: # ifnp.delete(REF, DATA_idx, 0)     the reference sample is smaller than the desired pseudo dataset then it is not possible to apply the Hit or Miss method
         print('Cannot produce %i events; only %i available'%(N_DATA, N_REF))
         exit()
 
-counter = 0                  # the counter will count how many times we apply the Hit or Miss Method to select an event      
+counter  = 0                 # the counter will count how many times we apply the Hit or Miss Method to select an event      
+counter2 = 0
 
 while DATA.shape[0]<N_DATA:  # filling the pseudo datasets until we have the desired number of pseudo events N_DATA                                                                                          
 
-        i = indeces[counter] # counter starts at 0 and increases at each loop. i = indeces[0]. If indices = [3, 27, 89, 2, ... ], then indeces[0]=3                                                          
-        x = REF[i:i+1, :]    # selects the information from one event e.g. REF[0:1,:] = [[SumPt3, InvMass3, MET3]]                                                                                           
-        f = weight[i]        # NewWeight of this specific event weight[3]                                                                                                                                    
+    if counter>=int(indices.shape[0]) and counter2 < 4 :
+        counter = counter - indices.shape
+        counter2 +=1
 
-        if f<0:                                     # we neglect negative weighted events                                                                                                                    
+    i = indices[counter] # counter starts at 0 and increases at each loop. i = indices[0]. If indices = [3, 27, 89, 2, ... ], then indices[0]=3                                                          
+        
+    x = REF[i:i+1, :]    # selects the information from one event e.g. REF[0:1,:] = [[SumPt3, InvMass3, MET3]]                                                                                           
+    f = weight[i]        # NewWeight of this specific event weight[3]                                                                                                                                    
+
+    if f<0:                                     # we neglect negative weighted events                                                                                                                    
+        DATA_idx = np.append(DATA_idx, i)
+        counter+=1                          # go to the next event. i = indices[1] = 27                                                                                                              
+        continue
+
+    r = f/f_MAX       # defining the weight ratio between the event weight and the maximum weight in NewWeights                                                                                          
+
+    if r>=1:          # we accept events fulfilling this condition, i.e. this should only happen at the event with w_max                                                                                 
+        if DATA.shape[0]==0:
+            DATA = x                                  # for the first event we set DATA = x = [SumPt3, InvMass3, MET3]                                                                           
+            DATA_idx = np.append(DATA_idx, i)
+        else:
+            DATA = np.concatenate((DATA, x), axis=0)  # if there are already some events in the pseudo dataset DATA, we just concatenate x                                                       
+            DATA_idx = np.append(DATA_idx, i)
+
+    else: # if r < 1                                                                                                                                                                                     
+        u = np.random.uniform(size=1) # generating a random number between [0,1[ to be compared with the weight ratio                                                                                
+
+        if u<= r:                     # we only accept events fulfilling this condition, if u>r then the event is rejected                                                                           
+            if DATA.shape[0]==0:
+                DATA = x
                 DATA_idx = np.append(DATA_idx, i)
-                counter+=1                          # go to the next event. i = indeces[1] = 27                                                                                                              
-                continue
-
-        r = f/f_MAX       # defining the weight ratio between the event weight and the maximum weight in NewWeights                                                                                          
-
-        if r>=1:          # we accept events fulfilling this condition, i.e. this should only happen at the event with w_max                                                                                 
-                if DATA.shape[0]==0:
-                        DATA = x                                  # for the first event we set DATA = x = [SumPt3, InvMass3, MET3]                                                                           
-                        DATA_idx = np.append(DATA_idx, i)
-                else:
-                        DATA = np.concatenate((DATA, x), axis=0)  # if there are already some events in the pseudo dataset DATA, we just concatenate x                                                       
-                        DATA_idx = np.append(DATA_idx, i)
-
-        else: # if r < 1                                                                                                                                                                                     
-                u = np.random.uniform(size=1) # generating a random number between [0,1[ to be compared with the weight ratio                                                                                
-
-                if u<= r:                     # we only accept events fulfilling this condition, if u>r then the event is rejected                                                                           
-                        if DATA.shape[0]==0:
-                                DATA = x
-                                DATA_idx = np.append(DATA_idx, i)
-                        else:
-                                DATA = np.concatenate((DATA, x), axis=0)
-                                DATA_idx = np.append(DATA_idx, i)
-        counter+=1
-
-        if counter>=REF.shape[0]:          # when counter = total number of unweighted events, we have looped over the entire dataset once                                                                   
-                print('--> End of file')
-                print('')
-                N_DATA = DATA.shape[0]     # the final shape of the pseudo dataset is exactly N_DATA that we have choosen above                                                                              
-                break
+            else:
+                DATA = np.concatenate((DATA, x), axis=0)
+                DATA_idx = np.append(DATA_idx, i)
+    counter+=1
+        
+    if counter>=REF.shape[0]:          # when counter = total number of unweighted events, we have looped over the entire dataset once                                                                   
+        #print('--> End of file \n')
+        N_DATA = DATA.shape[0]     # the final shape of the pseudo dataset is exactly N_DATA that we have choosen above                                                                              
+        break
 
 weight  = np.delete(W_REF, DATA_idx, 0)    # we now remove the event weights we picked up above from the full NewWeights dataset                                                                             
 REF     = np.delete(REF, DATA_idx, 0)      # we also delete the feature information of these events, i.e. we are deleting the corresponding [[SumPt3, InvMass3, MET3], [SumPt27,InvMass27, MET27, etc]] from the REF dataset                                       
@@ -196,7 +203,7 @@ for j in range(feature.shape[1]):          # i.e. j in range(3) because we are u
 ############## Training TAU ############# 
 ######################################### 
 
-print(' -->  Training TAU ...  ')
+print('\n' +'-->  Training TAU ... \n ')
 batch_size = feature.shape[0]
 input_shape = feature.shape[1]
 
@@ -213,11 +220,7 @@ t0=time.time()
 hist_tau = tau.fit(feature, target, batch_size=batch_size, epochs=total_epochs_tau, verbose=False)
 t1=time.time()
 
-print('Training time (seconds):')
-print(t1-t0)
-print('')
-print(' ...  End of TAU taining.\n')
-
+print('\n'+'--> End of TAU taining | Training time in seconds:'+str(t1-t0)+'\n')
 
 #########################################
 ################ OUTPUT #################                     
@@ -227,8 +230,7 @@ print(' ...  End of TAU taining.\n')
 loss_tau  = np.array(hist_tau.history['loss'])                         
 final_loss = loss_tau[-1]
 tau_OBS    = -2*final_loss
-print('')
-print('-- > TAU: %f \n'%(tau_OBS))
+print('--> TAU: %f \n'%(tau_OBS))
 
 # save t                                                                                                               
 log_t = OUTPUT_PATH+OUTPUT_FILE_ID+'_TAU.txt'
@@ -251,3 +253,5 @@ f.close()
 # save the model    
 log_weights = OUTPUT_PATH+OUTPUT_FILE_ID+'_TAU_weights.h5'
 tau.save_weights(log_weights)
+
+#Plot_variable(loss_tau, 'Loss')
