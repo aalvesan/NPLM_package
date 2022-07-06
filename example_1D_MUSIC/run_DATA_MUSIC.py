@@ -21,7 +21,6 @@ def create_config_file(config_table, OUTPUT_DIRECTORY):
 
 config_json      = {
     "features"                   : ['SumPt'],
-    "N_Bkg"                      : 4693,
     "output_directory"           : OUTPUT_DIRECTORY,
 
     "epochs"                     : 4000,
@@ -32,7 +31,7 @@ config_json      = {
     "correction"                 : "",
 }
 
-ID ='Nbkg'+str(config_json["N_Bkg"])
+ID ='Data'
 ID+='_patience'+str(config_json["patience"])+'_epochs'+str(config_json["epochs"])
 ID+='_arc'+str(config_json["BSMarchitecture"]).replace(', ', '_').replace('[', '').replace(']', '')+'_wclip'+str(config_json["BSMweight_clipping"])
 
@@ -41,9 +40,8 @@ ID+='_arc'+str(config_json["BSMarchitecture"]).replace(', ', '_').replace('[', '
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p','--pyscript',    type=str, help = "name of python script to execute", required=True) 
-    parser.add_argument('-l','--local',       type=int, help = 'if to be run locally', required=False, default=0)
-    parser.add_argument('-t', '--toys',       type=int, default = "100", help = "number of toys to be processed")
-    #parser.add_argument('-j', '--json',      type=str, default = "100", help = "configuration file")         
+    parser.add_argument('-l','--local',       type=int, default = '1', help = 'if to be run locally', required=False)
+    parser.add_argument('-t', '--toys',       type=int, default = '1', help = "number of toys to be processed")
 
     args     = parser.parse_args()
     pyscript = args.pyscript
@@ -62,11 +60,9 @@ if __name__ == '__main__':
     json_path = create_config_file(config_json, config_json["output_directory"])
 
     if args.local:
-        print('!!! Be sure you sourced /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc8-opt/setup.sh !!!')
-        print('!!! or activate your personal environment before                                             !!!')
         os.system("python %s/%s -j %s" %(os.getcwd(), pyscript, json_path))
     else:
-        label = "Jobs_Outputs"
+        label = "Jobs_Outputs_DATA"
         os.system("mkdir %s" %label)
         for i in range(ntoys):        
             # creating the src file

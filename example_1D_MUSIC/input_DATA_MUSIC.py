@@ -49,7 +49,9 @@ BSMdf              = compute_df(input_size=BSMarchitecture[0], hidden_layers=BSM
 
 ##### define output path ######################
 OUTPUT_PATH       = config_json["output_directory"]
-OUTPUT_FILE_ID    = 'Data'
+
+for classname in ML_Classes:
+    OUTPUT_FILE_ID    = '/Data_'+classname
 
 # do not run the job if the toy label is already in the folder                                      
 if os.path.isfile("%s/%s_t.txt" %(OUTPUT_PATH, OUTPUT_FILE_ID)):
@@ -68,27 +70,28 @@ feature_dict    = { 'weight_REF': np.array([]),
 for key in columns_training:
         feature_dict[key] = np.array([])
 
-for classname in ML_Classes:                                                                # ML_Classes is defined in DATAutils.py                                                                          
-        f = h5py.File(INPUT_MC+'H5_'+classname+'.h5', 'r')
-        w = np.array(f.get('NewWeights'))                                                   # this is the NewWeights dataset in the MC H5 file                                                               
-        feature_dict['weight_REF']  = np.append(feature_dict['weight_REF'],  w)
+for classname in ML_Classes:                                                                # ML_Classes is defined in DATAutils.py
+    
+    f = h5py.File(INPUT_MC+'H5_'+classname+'.h5', 'r')
+    w = np.array(f.get('NewWeights'))                                                   # this is the NewWeights dataset in the MC H5 file                                                               
+    feature_dict['weight_REF']  = np.append(feature_dict['weight_REF'],  w)
         
-        for key in columns_training:
-            feature_dict[key] = np.append(feature_dict[key], np.array(f.get(key)))      # reading SumPt amd creating a feature             
+    for key in columns_training:
+        feature_dict[key] = np.append(feature_dict[key], np.array(f.get(key)))      # reading SumPt amd creating a feature             
 
-        f.close()        
-        print('\n%s |  nr. of simulations: %i |  yield: %f'%(classname,w.shape[0], np.sum(w)))
+    f.close()        
+    print('\n%s |  nr. of simulations: %i |  yield: %f'%(classname,w.shape[0], np.sum(w)))
 
-        f      = h5py.File(INPUT_DATA+'DataH5_'+classname+'.h5', 'r')
-        w_data = np.array(f.get('weights'))                                                   # this is the NewWeights dataset in the MC H5 file                
-        feature_dict['weight_DATA'] = np.append(feature_dict['weight_DATA'], w_data)
+    f      = h5py.File(INPUT_DATA+'DataH5_'+classname+'.h5', 'r')
+    w_data = np.array(f.get('weights'))                                                   # this is the NewWeights dataset in the MC H5 file                
+    feature_dict['weight_DATA'] = np.append(feature_dict['weight_DATA'], w_data)
 
-        for key in columns_training:
-            DATA = np.array(f.get(key))[:,np.newaxis]      # reading SumPt amd creating a feature             
-        f.close()
+    for key in columns_training:
+        DATA = np.array(f.get(key))[:,np.newaxis]      # reading SumPt amd creating a feature             
+    f.close()
 
-        print ('Check that all weights are 1 for DATA : \n')
-        print (w_data)
+    print ('Check that all weights are 1 for DATA : \n')
+    print (w_data)
 
 W_REF   = feature_dict['weight_REF']                                                  # this is just the NewWeights dataset from H5 file          
 W_DATA  = feature_dict['weight_DATA']                                                 # this is just the NewWeights dataset from H5 file          

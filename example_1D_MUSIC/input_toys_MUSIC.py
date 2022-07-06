@@ -126,11 +126,11 @@ counter2 = 0
 
 while DATA.shape[0]<N_DATA:  # filling the pseudo datasets until we have the desired number of pseudo events N_DATA                                                                                          
 
-    if counter>=int(indices.shape[0]) and counter2 < 4 :
+    if counter>=int(indices.shape[0]) and counter2 < 3 :
         counter = counter - indices.shape
         counter2 +=1
 
-    i = indices[counter] # counter starts at 0 and increases at each loop. i = indices[0]. If indices = [3, 27, 89, 2, ... ], then indices[0]=3                                                          
+    i = indices[counter] # counter starts at 0 and increases at each loop. i = indices[0]. If indices = [3, 27, 89, 2, ... ], then indices[0]=3 
         
     x = REF[i:i+1, :]    # selects the information from one event e.g. REF[0:1,:] = [[SumPt3, InvMass3, MET3]]                                                                                           
     f = weight[i]        # NewWeight of this specific event weight[3]                                                                                                                                    
