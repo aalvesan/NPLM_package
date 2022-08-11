@@ -166,7 +166,7 @@ def Read_final_from_h5(DIR_IN, FILE_NAME, suffix):
             seed = int(seed.split('_')[0])
             s = np.append(s, seed)
     t = np.array(t)
-    print(t.shape)
+    #print(t.shape)
     f.close()
     return t, s
 
@@ -222,7 +222,7 @@ def GenUniformToy(Ntrials):
     KSdist = KSDistanceToUniform(sample)
     return KSdist
 
-def GetTSDistribution(Ntrials, Ntoys=1000):
+def GetTSDistribution(Ntrials, Ntoys=100):
     KSdistDistribution = []
     for i in range(Ntoys):
         KSdist = GenUniformToy(Ntrials)
@@ -230,6 +230,10 @@ def GetTSDistribution(Ntrials, Ntoys=1000):
     return np.array(KSdistDistribution)
 
 def pvalue(KSTestStat_Value, KSdistDistribution):
+    print('KSTestStat_Value :')
+    print(KSTestStat_Value)
+    print('KSdistDistribution min and max values are :')
+    print(KSdistDistribution.min(), KSdistDistribution.max())
     pval_right=np.sum(1*(KSdistDistribution>KSTestStat_Value))*1./KSdistDistribution.shape[0]
     return pval_right
 
@@ -239,14 +243,14 @@ def GenToyFromEmpiricalPDF(sample):
     toy     = np.array([sample[indeces[i]] for i in range(Ntrials)])
     return toy
 
-def KS_test(sample, dof, Ntoys=100000):
+def KS_test(sample, dof, Ntoys=100):
     Ntrials            = sample.shape[0]
     KSTestStat_Value   = KSTestStat(sample, dof)
     KSdistDistribution = GetTSDistribution(Ntrials=Ntrials, Ntoys=Ntoys)
     pval               = pvalue(KSTestStat_Value, KSdistDistribution)
     return pval
 
-def ErrorOnKSTestStat(sample, dof, Ntrials, Ntoys=100000):
+def ErrorOnKSTestStat(sample, dof, Ntrials, Ntoys=100):
     KS_out = []
     for _ in range(Ntrials):
         

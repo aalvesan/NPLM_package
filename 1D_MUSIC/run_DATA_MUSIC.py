@@ -12,7 +12,7 @@ from NPLM.NNutils import *
 ############## Creating the  config.json file ###############
 #############################################################
                                                             
-OUTPUT_DIRECTORY = '/eos/user/a/aalvesan/ml_test/'
+OUTPUT_DIRECTORY = '/eos/home-a/aalvesan/ml_test/OUTPUTS/2017UL_1Ele_1Muon_1MET'
 
 def create_config_file(config_table, OUTPUT_DIRECTORY):
     with open('%s/config.json'%(OUTPUT_DIRECTORY), 'w') as outfile:
@@ -31,21 +31,22 @@ config_json      = {
     "correction"                 : "",
 }
 
-ID ='Data'
-ID+='_patience'+str(config_json["patience"])+'_epochs'+str(config_json["epochs"])
-ID+='_arc'+str(config_json["BSMarchitecture"]).replace(', ', '_').replace('[', '').replace(']', '')+'_wclip'+str(config_json["BSMweight_clipping"])
+ID  = 'Data'
+ID += '_patience'+str(config_json["patience"])+'_epochs'+str(config_json["epochs"])
+ID += '_arc'+str(config_json["BSMarchitecture"]).replace(', ', '_').replace('[', '').replace(']', '')+'_wclip'+str(config_json["BSMweight_clipping"])
 
 #############################################################
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p','--pyscript',    type=str, help = "name of python script to execute", required=True) 
-    parser.add_argument('-l','--local',       type=int, default = '1', help = 'if to be run locally', required=False)
-    parser.add_argument('-t', '--toys',       type=int, default = '1', help = "number of toys to be processed")
+    parser.add_argument('-p', '--pyscript',   type=str,                  help = "name of python script to execute", required=True ) 
+    parser.add_argument('-l', '--local'   ,   type=int, default = '0'  , help = 'if to be run locally'            , required=False)
+    parser.add_argument('-t', '--toys'    ,   type=int, default = '0', help = "number of toys to be processed"                  )
 
     args     = parser.parse_args()
     pyscript = args.pyscript
     ntoys    = args.toys
+    ltoys    = args.local
 
     config_json['pyscript'] = pyscript
     
@@ -60,7 +61,8 @@ if __name__ == '__main__':
     json_path = create_config_file(config_json, config_json["output_directory"])
 
     if args.local:
-        os.system("python %s/%s -j %s" %(os.getcwd(), pyscript, json_path))
+        for i in range(ltoys):
+            os.system("python %s/%s -j %s" %(os.getcwd(), pyscript, json_path))
     else:
         label = "Jobs_Outputs_DATA"
         os.system("mkdir %s" %label)

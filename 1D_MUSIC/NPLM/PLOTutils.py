@@ -40,11 +40,11 @@ def Plot_Analysis_tdistribution(tvalues_BkgOnly, tvalues, df, rmin, rmax, bins=3
     ax.hist(chisq, bins=bins, range=(rmin, rmax), density = True, histtype = 'step', linewidth=2, color='darkgreen')
     ax.hist(tvalues_BkgOnly, bins=bins, range=(rmin, rmax), density = True, alpha = 0.7, edgecolor='blue')
     ax.hist(tvalues, bins=bins, range=(rmin, rmax), density= True, alpha = 0.7, edgecolor='red')
-    ax.legend(["$\chi^2$ with "+str(df)+" df",'Data samples following SM','Data samples containing New Physics'], loc='upper right')
+    ax.legend([r"\chi^2"+str(df)+" df",'Data samples following SM','Data samples containing New Physics'], loc='upper right')
     ax.set_ylabel('Probability')
     ax.set_xlabel("t")
     #compute significance
-    quantiles=np.percentile(tvalues, [16., 50., 84.])
+    quantiles=np.percentile(tvalues, [3000., 12000., 20000.])
     q50=quantiles[1]
     q16=quantiles[0]
     q84=quantiles[2]
@@ -116,7 +116,7 @@ def get_percentage_from_Zscore (t, df, Zscore_star_list=[], verbose=False):
             print('Z-score > %s: t > %s, percentage: %s'%(str(np.around(Zscore_star_list[i], 2)), str(np.around(t_star_list[i], 2)), str(np.around(percentage[i], 2)) ))
     return t_star_list, percentage
 
-def plot_1distribution(t, df, xmin=11000, xmax=12000, nbins=20, label='', save=False, save_path='', file_name=''):
+def plot_1distribution(t, df, xmin=0, xmax=60, nbins=30, label='', save=False, save_path='', file_name=''):
     '''
     Plot the histogram of a test statistics sample (t) and the target chi2 distribution. 
     The median and the error on the median are calculated in order to calculate the median Z-score and its error.
@@ -127,23 +127,37 @@ def plot_1distribution(t, df, xmin=11000, xmax=12000, nbins=20, label='', save=F
     plt.rcParams["font.family"] = "serif"
     fig  = plt.figure(figsize=(12, 9))
     fig.patch.set_facecolor('white')
+
     # plot distribution histogram
     bins      = np.linspace(xmin, xmax, nbins+1)
+
     Z_obs     = norm.ppf(chi2.cdf(np.median(t), df))
     t_obs_err = 1.2533*np.std(t)*1./np.sqrt(t.shape[0])
     Z_obs_p   = norm.ppf(chi2.cdf(np.median(t)+t_obs_err, df))
     Z_obs_m   = norm.ppf(chi2.cdf(np.median(t)-t_obs_err, df))
+
+    print ('t         :' + str(t))
+    print ('np.median :' + str(np.median(t)))
+    print ('chi2.cdf  :' + str(chi2.cdf(np.median(t), df)))
+
+    print ('\nZ_obs     :' + str(Z_obs))
+    print ('t_obs_err :' + str(t_obs_err))
+    print ('Z_obs_p   :' + str(Z_obs_p))
+    print ('Z_obs_m   :' + str(Z_obs_m))
+
     label  = 'sample %s\nsize: %i \nmedian: %s, std: %s\n'%(label, t.shape[0], str(np.around(np.median(t), 2)),str(np.around(np.std(t), 2)))
     label += 'Z = %s (+%s/-%s)'%(str(np.around(Z_obs, 2)), str(np.around(Z_obs_p-Z_obs, 2)), str(np.around(Z_obs-Z_obs_m, 2)))
+
     binswidth = (xmax-xmin)*1./nbins
     h = plt.hist(t, weights=np.ones_like(t)*1./(t.shape[0]*binswidth), color='lightblue', ec='#2c7fb8',
                  bins=bins, label=label)
     err = np.sqrt(h[0]/(t.shape[0]*binswidth))
     x   = 0.5*(bins[1:]+bins[:-1])
     plt.errorbar(x, h[0], yerr = err, color='#2c7fb8', marker='o', ls='')
-    # plot reference chi2
-    #x  = np.linspace(chi2.ppf(0.001, df), chi2.ppf(0.1, df), 100)
-    #plt.plot(x, chi2.pdf(x, df),'midnightblue', lw=5, alpha=0.8, label=r'$\chi^2$('+str(df)+')')
+
+    #plot reference chi2
+    x  = np.linspace(chi2.ppf(0.0001, df), chi2.ppf(0.9999, df), 100)
+    plt.plot(x, chi2.pdf(x, df),'midnightblue', lw=5, alpha=0.8, label=r'$\chi^2$('+str(df)+')')
     font = font_manager.FontProperties(family='serif', size=14) 
     plt.legend(prop=font)
     plt.xlabel('t', fontsize=18, fontname="serif")
@@ -378,7 +392,7 @@ def plot_alpha_scores(t1, t2, df, Zscore_star_list=[2, 3, 5], label1='1', label2
     return
 
 def plot_training_data(data, weight_data, ref, weight_ref, feature_labels, bins_code, xlabel_code, ymax_code={},
-                       save=False, save_path='', file_name=''):
+                       save=True, save_path='', file_name=''):
     '''
     Plot distributions of the input variables for the training samples.
     
@@ -400,7 +414,7 @@ def plot_training_data(data, weight_data, ref, weight_ref, feature_labels, bins_
         ax1= fig.add_axes([0.1, 0.43, 0.8, 0.5])        
         hD = plt.hist(data[:, plt_i],weights=weight_data, bins=bins, label='DATA', color='black', lw=1.5, histtype='step', zorder=4)
         hR = plt.hist(ref[:, plt_i], weights=weight_ref, color='#a6cee3', ec='#1f78b4', bins=bins, lw=1, label='REFERENCE')
-        plt.errorbar(0.5*(bins[1:]+bins[:-1]), hD[0], yerr= np.sqrt(hD[0]), color='black', ls='', marker='o', ms=5, zorder=3)
+        #plt.errorbar(0.5*(bins[1:]+bins[:-1]), hD[0], yerr= np.sqrt(hD[0]), color='black', ls='', marker='o', ms=5, zorder=3)
         font = font_manager.FontProperties(family='serif', size=16)
         l    = plt.legend(fontsize=18, prop=font, ncol=2)
         font = font_manager.FontProperties(family='serif', size=18) 
@@ -411,7 +425,7 @@ def plot_training_data(data, weight_data, ref, weight_ref, feature_labels, bins_
         plt.yscale('log')
         ax2 = fig.add_axes([0.1, 0.1, 0.8, 0.3]) 
         x   = 0.5*(bins[1:]+bins[:-1])
-        plt.errorbar(x, hD[0]/hR[0], yerr=np.sqrt(hD[0])/hR[0], ls='', marker='o', label ='DATA/REF', color='black')
+        #plt.errorbar(x, hD[0]/hR[0], yerr=np.sqrt(hD[0])/hR[0], ls='', marker='o', label ='DATA/REF', color='black')
         font = font_manager.FontProperties(family='serif', size=16)
         plt.legend(fontsize=18, prop=font)
         plt.xlabel(xlabel_code[key], fontsize=22, fontname='serif')
@@ -428,7 +442,7 @@ def plot_training_data(data, weight_data, ref, weight_ref, feature_labels, bins_
                 if file_name=='': file_name = 'InputVariable_%s'%(key)
                 else: file_name += '_InputVariable_%s'%(key)
                 fig.savefig(save_path+file_name+'.pdf')
-        plt.show()
+        #plt.show()
         plt.close()
         plt_i+=1
     return

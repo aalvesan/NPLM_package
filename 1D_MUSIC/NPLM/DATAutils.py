@@ -1,6 +1,10 @@
 import numpy as np
 
-ML_Classes = ['1Ele_1Muon_1MET']
+ML_Classes = [#'1Ele_1Muon_1MET',
+              '1Ele_1Muon_1Jet',
+              #'1Ele_1Muon_1Jet_1MET',
+              #'2Ele_1bJet'
+              ]
 
 bkg_list = ['AllData_ZX_redTree_2018',
             'ggTo2e2tau_Contin_MCFM701_redTree_2018',   
