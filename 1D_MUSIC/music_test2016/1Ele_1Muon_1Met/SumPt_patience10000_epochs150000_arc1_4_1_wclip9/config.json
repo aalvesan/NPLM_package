@@ -1,0 +1,16 @@
+{
+    "features": [
+        "SumPt"
+    ],
+    "output_directory": "/afs/cern.ch/user/a/aalvesan/private/NPLM_package/1D_MUSIC/music_test2016/1Ele_1Muon_1Met/SumPt_patience10000_epochs150000_arc1_4_1_wclip9",
+    "epochs": 150000,
+    "patience": 10000,
+    "BSMarchitecture": [
+        1,
+        4,
+        1
+    ],
+    "BSMweight_clipping": 9,
+    "correction": "",
+    "pyscript": "input_toys_MUSIC.py"
+}

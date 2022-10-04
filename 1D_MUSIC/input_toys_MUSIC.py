@@ -63,12 +63,12 @@ if os.path.isfile("%s/%s_t.txt" %(OUTPUT_PATH, OUTPUT_FILE_ID)):
 ######## Reading input H5 Files ######### 
 ######################################### 
 
-INPUT = '/eos/user/a/aalvesan/ml_test/2016_H5/'                     # path to the h5 files directory        
+INPUT = '/eos/user/a/aalvesan/NPLM/Input_2017UL/'  # 2016 or 2017UL !!  path to the h5 files directory        
 
 feature_dict    = { 'weight_REF': np.array([]),
                     'weight_DATA': np.array([])}
 
-print ('\nReading h5 MC and DATA files from' + str(INPUT) + '\n')
+print ('\nReading h5 MC from' + str(INPUT) + '\n')
 
 for key in columns_training:
         feature_dict[key] = np.array([])
@@ -112,6 +112,7 @@ print ('W_REF max = ' + str(np.max(W_REF)) + '\n')
 index     = np.arange(W_REF.shape[0])
 event_idx = np.array([], dtype = int) 
 
+max_x         = 1350    # 1350 for 1Jet |  1000 for 1Met 
 negative_w    = 0 
 large_w       = 0
 large_SumPt   = 0 
@@ -123,13 +124,13 @@ for i in index:
     if W_REF[i] > 0.7 :
         large_w +=1
         event_idx = np.append(event_idx, i)
-    if REF[i] >= 1000:
+    if REF[i] >= max_x:
         large_SumPt+=1
         event_idx = np.append(event_idx, i)
 
 print ('Large SumPt events : ' + str(large_SumPt)) 
 print ('Weights < 0        : ' + str(negative_w)) 
-print ('Weights > 0.2      : ' + str(large_w)+ '\n') 
+print ('Weights > 0.7      : ' + str(large_w)+ '\n') 
 
 # we need to reweight the remaining events so that the luminosity is conserved
 W_REF = np.delete(W_REF, event_idx, 0)         # deleting weights outside the [0,0.2] intreval 
@@ -141,8 +142,8 @@ print ('W_REF min = ' + str(np.min(W_REF)))
 print ('W_REF max = ' + str(np.max(W_REF)) + '\n')
 
 
-#####################################################################                                    
-####### Hit or Miss Method - Building Pseudo datasets  ##############                                   
+#####################################################################
+####### Hit or Miss Method - Building Pseudo datasets  ##############  
 #####################################################################
 
 print('******** Hit or Miss Sampling Procedure ********\n')
@@ -184,7 +185,7 @@ while DATA.shape[0]<N_DATA:  # filling the pseudo datasets until we have the des
     x = REF[i:i+1, :]        # selects the information from one event e.g. REF[0:1,:] = [[SumPt3, InvMass3, MET3]]
     f = weight[i]
 
-    if f<0 or f>0.7 or x>=1000 :                # events with f>1 are only 0.05% so it is safe to reject them. 
+    if f<0 or f>0.7 or x>=max_x :                # events with f>1 are only 0.05% so it is safe to reject them. 
         DATA_idx = np.append(DATA_idx, i)
         counter+=1                                    # go to the next event. i = indices[1] = 27    
         rejected+=1
@@ -220,11 +221,27 @@ while DATA.shape[0]<N_DATA:  # filling the pseudo datasets until we have the des
         #N_DATA = DATA.shape[0]         # the final shape of the pseudo dataset is exactly N_DATA that we have choosen above                 
         break
 
+w_sum   = np.sum(weight)
+
+print('»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»')
+print('weighted min   : ' + str(np.min(weight)))
+print('weighted max   : ' + str(np.max(weight)))
+print('')
+
 weight  = np.delete(W_REF, DATA_idx, 0)    # deleting the weights of the events we used for the pseudodataset
 REF     = np.delete(REF, DATA_idx, 0)      # deleting the feature information of those events, i.e. we are deleting the corresponding [[SumPt3, InvMass3, MET3], ... ] from the REF dataset         
-
+w_sum_reweighted = np.sum(weight)
 # reweighting the left over events to conserve luminosity
-weight  = weight * weight_sum_R / np.sum(weight)
+weight  = weight * weight_sum_R / w_sum_reweighted
+
+print('weight_sum_R     : ' + str(weight_sum_R))
+print('w_sum            : ' + str(w_sum))
+print('')
+print('w_sum_reweighted : ' + str(w_sum_reweighted))
+print('reweighted min   : ' + str(np.min(weight)))
+print('reweighted max   : ' + str(np.max(weight)))
+print('»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»»')
+
 
 print ('After the HitMiss method we have that : \n' )
 
@@ -254,24 +271,6 @@ weights = np.concatenate((weight, np.ones(DATA.shape[0])), axis=0)
 target  = np.concatenate((np.zeros(REF.shape[0]), np.ones(DATA.shape[0])), axis=0)    # arrays filled with zeros/ones to define reference label = 0 and psedo data label = 1
 target  = np.stack((target, weights), axis=1)                                         # returns [[0,w][0,w] ... [1,1] [1,1]] i.e. each weight has a label  
 
-'''
-for j in range(feature.shape[1]):          # i.e. j can be in range(3) if we use all 3 kinematic variables in columns_training in the config.json file. Here we only use SumPt so automatically j=0.
-
-    vec  = feature[:, j]                   # SumPt (j=0), InvMass (j=1) or MET (j=2)     
-    mean = np.mean(vec)                    # just the arithmetic mean
-    std  = np.std(vec)                     # standard deviation of the dataset
-    print('\nNormalizing feature dataset with mean = ' +str(mean) + ' and standard dev. = ' + str(std)+'\n')
-
-    if np.min(vec) < 0:                    # ideally this will never happen (neither SumPt, InvMass nor MET are < 0 )
-        vec = vec-mean
-        vec = vec*1./ std
-
-    elif np.max(vec) > 1.0:                # Assume data is exponential -- just set mean to 1.                                              
-        vec = vec *1./ mean
-    
-    feature[:, j] = vec
-'''
-
 # Normalizind the feature dataset to [0,1] intreval 
 x_max = np.max(feature)
 x_min = np.min(feature)
@@ -291,7 +290,7 @@ print('\nfeature.min   : ' + str(np.min(feature)))
 print('feature.max   : ' + str(np.max(feature)))
 
 
-bins_code      = {'SumPt': np.arange(0,1, 0.05)}  
+bins_code      = {'SumPt': np.arange(0,1, 0.01)}  
 ymax_code      = {'SumPt': 1}
 xlabel_code    = {'SumPt': r'$SumPt$',}
 feature_labels = list(bins_code.keys())
@@ -306,8 +305,8 @@ weight_REF     = weight[target[:, 0]==0]
 weight_DATA    = weight[target[:, 0]==1]
 
 plot_training_data(data=DATA, weight_data=weight_DATA, ref=REF, weight_ref=weight_REF, 
-                   feature_labels=feature_labels, bins_code=bins_code, xlabel_code=xlabel_code, 
-                   ymax_code=ymax_code,save=True, save_path='/eos/user/a/aalvesan/ml_test/', file_name='Training_REF_DATA_NPLM')
+                  feature_labels=feature_labels, bins_code=bins_code, xlabel_code=xlabel_code, 
+                  ymax_code=ymax_code,save=True, save_path=OUTPUT_PATH, file_name='/plot_REF_DATA')
 
 
 fig = plt.figure(figsize=(9,6))                                          
@@ -327,7 +326,7 @@ plt.xlabel('SumPt' , fontsize=18, fontname='serif')
 plt.xticks(fontsize=16, fontname='serif')
 plt.yticks(fontsize=16, fontname='serif')
 plt.grid()
-plt.savefig('Training_REF_DATA.pdf')
+plt.savefig(OUTPUT_PATH + '/Training_REF_DATA.pdf')
 plt.close()
 
 #########################################                           
@@ -397,5 +396,5 @@ plt.xlabel('Epochs', fontsize=18, fontname='serif')
 plt.xticks(fontsize=16, fontname='serif')
 plt.yticks(fontsize=16, fontname='serif')
 plt.grid()
-plt.savefig('Loss_toy.pdf')
+plt.savefig(OUTPUT_PATH + '/Loss_toy.pdf')
 plt.close()

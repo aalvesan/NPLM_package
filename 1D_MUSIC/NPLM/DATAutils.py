@@ -1,7 +1,7 @@
 import numpy as np
 
-ML_Classes = [#'1Ele_1Muon_1MET',
-              '1Ele_1Muon_1Jet',
+ML_Classes = ['1Ele_1Muon_1MET',
+              #'1Ele_1Muon_1Jet',
               #'1Ele_1Muon_1Jet_1MET',
               #'2Ele_1bJet'
               ]

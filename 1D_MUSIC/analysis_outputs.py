@@ -23,7 +23,8 @@ TAU_architecture    = config_json['BSMarchitecture']
 TAU_df              = compute_df(input_size=TAU_architecture[0], hidden_layers=TAU_architecture[1:-1])
 TAU_wc              = config_json['BSMweight_clipping']
 TAU_patience        = config_json['patience']
-#N_Bkg               = config_json['N_Bkg']
+
+N_Bkg               = 6075    #1Ele_1Muon_1MET 2017UL 6075  2016 4444  |  
 
 ##########################################
 #### Collecting jobs to summary files ####
@@ -64,18 +65,18 @@ tau_history      = Read_history_from_h5(DIR_IN = out_folder, FILE_NAME = 'TAU', 
 
 ##### Plotting empirical TAU distribution 
 
-label            = 'B=27494'
-plot_1distribution(tau, df=TAU_df, xmin=-50, xmax=50, nbins=60, label=r'$\tau(D)$, '+label, save=True, save_path=out_folder, file_name='t_values')
+label            = 'B=%i'%(N_Bkg)
+plot_1distribution(tau, df=TAU_df, xmin=-50, xmax=150, nbins=60, label=r'$\tau(D)$, '+label, save=True, save_path=out_folder, file_name='TAU')
 
 ##### Plotting TAU distribution's evolution during training time  
 
 Plot_Percentiles_ref(tau_history, df=TAU_df, patience=TAU_patience,  wc=str(TAU_wc), ymax=140, ymin=-100, save=True, save_path=out_folder, file_name='PercentilesRef')
 
 ##### Plotting TAU and TAU - DELTA(=0) empirical distributions
-label = 'B=27494'
-plot_2distribution(tau, tau, df=TAU_df, xmin=0, xmax=50, nbins=30, 
+label = 'B=%i'%(N_Bkg)
+plot_2distribution(tau, tau, df=TAU_df, xmin=0, xmax=150, nbins=60, 
                    label1=r'$\tau(D,\,A), $'+label, label2=r'$\tau(D,\,A)-\Delta(D,\,A)$, '+label,
-                   save=True, save_path=out_folder, file_name='2D_distribution')
+                   save=True, save_path=out_folder, file_name='TAU_DELTA')
 
 pval = KS_test(tau, dof=TAU_df, Ntoys=100)   # checking asymtotic behaviour
 print('')

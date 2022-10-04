@@ -11,8 +11,8 @@ from NPLM.NNutils import *
 #############################################################
 ############## Creating the  config.json file ###############
 #############################################################
-                                                            
-OUTPUT_DIRECTORY = '/eos/home-a/aalvesan/ml_test/OUTPUTS/2017UL_1Ele_1Muon_1MET'
+
+OUTPUT_DIRECTORY = '/afs/cern.ch/user/a/aalvesan/private/NPLM_package/1D_MUSIC/DATA_music_test2017/1Ele_1Muon_1Jet/'
 
 def create_config_file(config_table, OUTPUT_DIRECTORY):
     with open('%s/config.json'%(OUTPUT_DIRECTORY), 'w') as outfile:
@@ -23,11 +23,11 @@ config_json      = {
     "features"                   : ['SumPt'],
     "output_directory"           : OUTPUT_DIRECTORY,
 
-    "epochs"                     : 4000,
-    "patience"                   : 1000,
+    "epochs"                     : 3000,
+    "patience"                   : 100,
 
     "BSMarchitecture"            : [1,4,1],
-    "BSMweight_clipping"         : 14, 
+    "BSMweight_clipping"         : 10, 
     "correction"                 : "",
 }
 

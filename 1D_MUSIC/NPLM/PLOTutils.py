@@ -439,8 +439,8 @@ def plot_training_data(data, weight_data, ref, weight_ref, feature_labels, bins_
         if save:
             if save_path=='': print('argument save_path is not defined. The figure will not be saved.')
             else:
-                if file_name=='': file_name = 'InputVariable_%s'%(key)
-                else: file_name += '_InputVariable_%s'%(key)
+                if file_name=='': file_name = '_%s'%(key)
+                else: file_name += '_%s'%(key)
                 fig.savefig(save_path+file_name+'.pdf')
         #plt.show()
         plt.close()
