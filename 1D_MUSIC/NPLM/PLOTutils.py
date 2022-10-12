@@ -116,7 +116,7 @@ def get_percentage_from_Zscore (t, df, Zscore_star_list=[], verbose=False):
             print('Z-score > %s: t > %s, percentage: %s'%(str(np.around(Zscore_star_list[i], 2)), str(np.around(t_star_list[i], 2)), str(np.around(percentage[i], 2)) ))
     return t_star_list, percentage
 
-def plot_1distribution(t, df, xmin=0, xmax=60, nbins=30, label='', save=False, save_path='', file_name=''):
+def plot_1distribution(t, df, ymin=0, ymax=0.12, xmin=0, xmax=50, nbins=30, wc='', label='', save=False, save_path='', file_name=''):
     '''
     Plot the histogram of a test statistics sample (t) and the target chi2 distribution. 
     The median and the error on the median are calculated in order to calculate the median Z-score and its error.
@@ -125,7 +125,7 @@ def plot_1distribution(t, df, xmin=0, xmax=60, nbins=30, label='', save=False, s
     df: (int) chi2 degrees of freedom
     '''
     plt.rcParams["font.family"] = "serif"
-    fig  = plt.figure(figsize=(12, 9))
+    fig  = plt.figure(figsize=(12, 12))
     fig.patch.set_facecolor('white')
 
     # plot distribution histogram
@@ -145,8 +145,9 @@ def plot_1distribution(t, df, xmin=0, xmax=60, nbins=30, label='', save=False, s
     print ('Z_obs_p   :' + str(Z_obs_p))
     print ('Z_obs_m   :' + str(Z_obs_m))
 
-    label  = 'sample %s\nsize: %i \nmedian: %s, std: %s\n'%(label, t.shape[0], str(np.around(np.median(t), 2)),str(np.around(np.std(t), 2)))
-    label += 'Z = %s (+%s/-%s)'%(str(np.around(Z_obs, 2)), str(np.around(Z_obs_p-Z_obs, 2)), str(np.around(Z_obs-Z_obs_m, 2)))
+    label = '\nmedian: %s, std: %s\n'%(str(np.around(np.median(t), 2)),str(np.around(np.std(t), 2)))
+#    label  = 'sample %s\nsize: %i \nmedian: %s, std: %s\n'%(label, t.shape[0], str(np.around(np.median(t), 2)),str(np.around(np.std(t), 2)))
+#    label += 'Z = %s (+%s/-%s)'%(str(np.around(Z_obs, 2)), str(np.around(Z_obs_p-Z_obs, 2)), str(np.around(Z_obs-Z_obs_m, 2)))
 
     binswidth = (xmax-xmin)*1./nbins
     h = plt.hist(t, weights=np.ones_like(t)*1./(t.shape[0]*binswidth), color='lightblue', ec='#2c7fb8',
@@ -154,14 +155,16 @@ def plot_1distribution(t, df, xmin=0, xmax=60, nbins=30, label='', save=False, s
     err = np.sqrt(h[0]/(t.shape[0]*binswidth))
     x   = 0.5*(bins[1:]+bins[:-1])
     plt.errorbar(x, h[0], yerr = err, color='#2c7fb8', marker='o', ls='')
+    plt.ylim(ymin, ymax)
+    plt.title('Weight Clipping = ' + str(wc), fontsize=20)
 
     #plot reference chi2
     x  = np.linspace(chi2.ppf(0.0001, df), chi2.ppf(0.9999, df), 100)
-    plt.plot(x, chi2.pdf(x, df),'midnightblue', lw=5, alpha=0.8, label=r'$\chi^2$('+str(df)+')')
+    plt.plot(x, chi2.pdf(x, df),'midnightblue', lw=5, alpha=0.8, label=(r'$\chi^2$('+str(df)+')'))
     font = font_manager.FontProperties(family='serif', size=14) 
     plt.legend(prop=font)
     plt.xlabel('t', fontsize=18, fontname="serif")
-    plt.ylabel('Probability', fontsize=18, fontname="serif")
+    plt.ylabel('P(t|R)', fontsize=18, fontname="serif")
     plt.yticks(fontsize=16, fontname="serif")
     plt.xticks(fontsize=16, fontname="serif")
     if save:
@@ -215,11 +218,11 @@ def plot_2distribution(t1, t2, df, xmin=0, xmax=300, nbins=10, label1='1', label
     plt.errorbar(x, h[0], yerr = err, color='seagreen', marker='o', ls='')
     # plot reference chi2
     x  = np.linspace(chi2.ppf(0.0001, df), chi2.ppf(0.9999, df), 100)
-    plt.plot(x, chi2.pdf(x, df),'midnightblue', lw=5, alpha=0.8, label=r'$\chi^2$('+str(df)+')')
+    plt.plot(x, chi2.pdf(x, df),'midnightblue', lw=5, alpha=0.8, label=(r'$\chi^2$('+str(df)+')'))
     font = font_manager.FontProperties(family='serif', size=14) #weight='bold', style='normal', )
     plt.legend(ncol=1, loc='upper right', prop=font)
     plt.xlabel('t', fontsize=14, fontname="serif")
-    plt.ylabel('Probability', fontsize=14, fontname="serif")
+    plt.ylabel('P(t|R)', fontsize=14, fontname="serif")
     plt.ylim(0., np.max(chi2.pdf(x, df))*1.3)
     plt.yticks(fontsize=16, fontname="serif")
     plt.xticks(fontsize=16, fontname="serif")
@@ -298,7 +301,7 @@ def Plot_Percentiles(tvalues_check, patience=1, checkpoints=[], ylabel='t', ymax
     plt.close(fig)
     return
 
-def Plot_Percentiles_ref(tvalues_check, df, patience=1, wc=None, ymax=300, ymin=0, save=False, save_path='', file_name=''):
+def Plot_Percentiles_ref(tvalues_check, df, patience=1, wc=None, ymax=100, ymin=-100, save=False, save_path='', file_name=''):
     '''
     The funcion creates the plot of the evolution in the epochs of the [2.5%, 25%, 50%, 75%, 97.5%] quantiles of the toy sample distribution.
     The percentile lines for the target chi2 distribution are shown as a reference.

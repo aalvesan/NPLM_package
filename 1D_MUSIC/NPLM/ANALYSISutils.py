@@ -43,7 +43,7 @@ def collect_txt(DIR_IN, suffix='t', files_prefix=[],  verbose=False):
         if(np.isnan(np.array([t]))):
             if verbose: print('nan')
             t = -1
-        print(t)
+        #print(t)
         tvalues  = np.append(tvalues, t)
         files_id = np.append(files_id, file_id)
         seeds    = np.append(seeds, seed)
@@ -105,10 +105,9 @@ def collect_history(files_id, DIR_IN, suffix='t', key='loss', verbose=False):
             tdistributions_check = np.concatenate((tdistributions_check, loss), axis=1)
         cnt = cnt+1
         f.close()
-    if verbose:
-        print('Final history array shape')
-        print('(nr toys, nr check points)')
-        print(tdistributions_check.T.shape)
+    print('collect history.  array shape (nr toys, nr check points)' + str(tdistributions_check.T.shape))
+    print('')
+    print(tdistributions_check.T)
     return tdistributions_check.T
 
 def save_history_to_h5(suffix, patience, tvalues_check, DIR_OUT, FILE_NAME='', seeds=[]):
@@ -130,7 +129,11 @@ def save_history_to_h5(suffix, patience, tvalues_check, DIR_OUT, FILE_NAME='', s
         f.create_dataset('seeds', data=np.array(seeds), compression='gzip')
     for i in range(nr_check_points):
         f.create_dataset('%s'%(epochs_check[i]), data=tvalues_check[:, i], compression='gzip')
+    #print('stored in TAU_history.h5 file is: ')
+    #print(f.keys())
+    #print(f['1000'][:])
     f.close()
+    print('')
     print('Saved to file: %s'%(log_file))
     return
 
@@ -166,7 +169,6 @@ def Read_final_from_h5(DIR_IN, FILE_NAME, suffix):
             seed = int(seed.split('_')[0])
             s = np.append(s, seed)
     t = np.array(t)
-    #print(t.shape)
     f.close()
     return t, s
 
@@ -182,21 +184,30 @@ def Read_history_from_h5(DIR_IN, FILE_NAME, suffix):
     '''
     log_file = DIR_IN+FILE_NAME+suffix+'.h5'
     f = h5py.File(log_file,"r")
+    
+    epochs_check = np.array([])
     for key in list(f.keys()):
         if key!='seeds':
-            epochs_check  = [int(key)]
+            if epochs_check == np.array([]):
+                epochs_check = [int(key)]
+            else:
+                epochs_check = np.append(epochs_check,[int(key)])
+
+    print('Read TAU_history.h5  epochs_check.shape: ' + str(epochs_check.shape))
+    print('')
+    
     tvalues_check = np.array([])
     for i in range(len(epochs_check)):
-        t = f.get(str(epochs_check[i]))
-        t = np.array(t)
-        t = np.expand_dims(t, axis=1)
+        t = f[str(int(epochs_check[i]))][:]
+        t = np.expand_dims(t, axis = 1)
         if not i:
             tvalues_check = t
         else:
             tvalues_check = np.concatenate((tvalues_check, t), axis=1)
     f.close()
-    print('Output shape:')
-    print(tvalues_check.shape)
+    print('history array shape: ' + str(tvalues_check.shape))
+    print('')
+    print(tvalues_check)
     return tvalues_check
 
 ### tools to compute the Kolmogorov-Smirnov test statistic
@@ -210,32 +221,41 @@ def KSDistanceToUniform(sample):
         KSdist = np.maximum(1-sortedsample[1], sortedsample[1])
     else:
         KSdist = np.max([np.maximum(np.abs(sortedsample[i+1]-ECDF[i]), np.abs(sortedsample[i+1]-ECDF[i+1])) for i in np.arange(Ntrials)])
+    print('KSDistanceToUniform test value = ' + str(KSdist) + '\n')
+    print('Ntrials = ' + str(Ntrials) + '\n')
     return KSdist
 
 def KSTestStat(data, ndof):
     sample = chi2.cdf(data, ndof)
     KSdist = KSDistanceToUniform(sample)
+    print('KSTestStat test value = ' + str(KSdist) + '\n')
     return KSdist
 
 def GenUniformToy(Ntrials):
     sample = np.random.uniform(size=(Ntrials,))
     KSdist = KSDistanceToUniform(sample)
+    print('GetUniformToy test value = ' + str(KSdist) + '\n')
     return KSdist
 
-def GetTSDistribution(Ntrials, Ntoys=100):
+def GetTSDistribution(Ntrials, Ntoys=50):
     KSdistDistribution = []
     for i in range(Ntoys):
         KSdist = GenUniformToy(Ntrials)
         KSdistDistribution.append(KSdist)
+    print('GetTSDistribution : \n')
+    print(np.array(KSdistDistribution))
+    print('')
     return np.array(KSdistDistribution)
 
 def pvalue(KSTestStat_Value, KSdistDistribution):
-    print('KSTestStat_Value :')
-    print(KSTestStat_Value)
-    print('KSdistDistribution min and max values are :')
-    print(KSdistDistribution.min(), KSdistDistribution.max())
+    print('KSTestStat_Value: ' + str(KSTestStat_Value))
+    print('')
+    print('KSdistDistribution min | max:' + str(KSdistDistribution.min()) + ' | ' + str(KSdistDistribution.max()))
+    print('')
+    print('KSdistDistribution>KSTestStat_Value: ' + str(KSdistDistribution>KSTestStat_Value))
     pval_right=np.sum(1*(KSdistDistribution>KSTestStat_Value))*1./KSdistDistribution.shape[0]
-    print ('pval_right : ' +str(pval_right))    
+    print('')
+    print('pval_right: ' +str(pval_right))    
     return pval_right
 
 def GenToyFromEmpiricalPDF(sample):
@@ -244,14 +264,14 @@ def GenToyFromEmpiricalPDF(sample):
     toy     = np.array([sample[indeces[i]] for i in range(Ntrials)])
     return toy
 
-def KS_test(sample, dof, Ntoys=100):
+def KS_test(sample, dof, Ntoys=50):
     Ntrials            = sample.shape[0]
     KSTestStat_Value   = KSTestStat(sample, dof)
     KSdistDistribution = GetTSDistribution(Ntrials=Ntrials, Ntoys=Ntoys)
     pval               = pvalue(KSTestStat_Value, KSdistDistribution)
     return pval
 
-def ErrorOnKSTestStat(sample, dof, Ntrials, Ntoys=100):
+def ErrorOnKSTestStat(sample, dof, Ntrials, Ntoys=50):
     KS_out = []
     for _ in range(Ntrials):
         
