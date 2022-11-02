@@ -12,8 +12,7 @@ from NPLM.NNutils import *
 ############## Creating the  config.json file ###############
 #############################################################
                                                             
-OUTPUT_DIRECTORY = '/afs/cern.ch/user/a/aalvesan/private/NPLM_package/1D_MUSIC/music_test2017/1Ele_1Muon_1Met/'
-#'/eos/user/a/aalvesan/ml_test/OUTPUTS/2016_1Ele_1Muon_1Jet/'
+OUTPUT_DIRECTORY = '/afs/cern.ch/user/a/aalvesan/private/NPLM_package/1D_MUSIC/music_test2016/1Ele_1Muon_1Met_v2/'
 
 def create_config_file(config_table, OUTPUT_DIRECTORY):
     with open('%s/config.json'%(OUTPUT_DIRECTORY), 'w') as outfile:
@@ -28,7 +27,7 @@ config_json      = {
     "patience"                   : 1000,
 
     "BSMarchitecture"            : [1,4,1],
-    "BSMweight_clipping"         : 30,
+    "BSMweight_clipping"         : 100,
     "correction"                 : "",
 }
 

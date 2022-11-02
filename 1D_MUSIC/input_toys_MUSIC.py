@@ -68,7 +68,7 @@ INPUT = '/eos/user/a/aalvesan/NPLM/Input_2017UL/'  # 2016 or 2017UL !!  path to 
 feature_dict    = { 'weight_REF': np.array([]),
                     'weight_DATA': np.array([])}
 
-print ('\nReading h5 MC from' + str(INPUT) + '\n')
+print ('\nReading h5 MC from ' + str(INPUT) + '\n')
 
 for key in columns_training:
         feature_dict[key] = np.array([])
@@ -85,12 +85,9 @@ for classname in ML_Classes:
         feature_dict[key] = np.append(feature_dict[key], np.array(f.get(key)))      # reading SumPt
         f.close()
 
-    '''
-    f = h5py.File(INPUT+'DataH5_'+classname+'.h5',  'r')
-    w = np.array(f.get('weights')) 
-    N_Bkg_data    = w.shape[0]
-    f.close()
-    '''
+    print('')    
+    print('w is ')
+    print(w)
 
     print('----------------------------------------------------------------------------------')
     print('%s |  nr. of simulations: %i |  yield: %f'%(classname,w.shape[0], np.sum(w)))
@@ -135,12 +132,16 @@ print ('Weights > 0.7      : ' + str(large_w)+ '\n')
 # we need to reweight the remaining events so that the luminosity is conserved
 W_REF = np.delete(W_REF, event_idx, 0)         # deleting weights outside the [0,0.2] intreval 
 REF   = np.delete(REF  , event_idx, 0)         # deleting the corresponding SumPt of those weights 
-W_REF = W_REF * weight_sum_R/np.sum(W_REF)     # increasing the events weights to conserve sum(NewWeights)
 
 print ('\nAfter cleaning  : REF.shape = ' + str(REF.shape) + '  | W_REF.shape[0] = ' + str(W_REF.shape[0])+ ' | sum(W_REF) = ' + str(np.sum(W_REF)) + '\n')
 print ('W_REF min = ' + str(np.min(W_REF)))
 print ('W_REF max = ' + str(np.max(W_REF)) + '\n')
 
+W_REF = W_REF * weight_sum_R/np.sum(W_REF)     # increasing the events weights to conserve sum(NewWeights)
+
+print ('\nAfter weight reweighting:')
+print ('W_REF min = ' + str(np.min(W_REF)))
+print ('W_REF max = ' + str(np.max(W_REF)) + '\n')
 
 #####################################################################
 ####### Hit or Miss Method - Building Pseudo datasets  ##############  
